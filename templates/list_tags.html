@@ -1,0 +1,272 @@
+<!--
+annotations.html - Display a list of user annotation jobs with links to details for each job
+Copyright (C) 2011-2018 Vas Vasiliadis <vas@uchicago.edu>
+University of Chicago
+-->
+{% extends "base.html" %}
+{% block title %}Tags{% endblock %}
+{% block content %}
+<style>
+h1{
+	font-family : Montserrat;
+    font-weight: bold;
+    font-size : 22px;
+    text-decoration: none;
+	color : #595A5A;
+    color : rgb(89, 90, 90);
+    text-align: center;
+    padding: 1.5px 10px 0px 15px;
+    grid-column: 2 / span 2;
+}
+
+h2{
+	font-family : Montserrat;
+	font-size : 18px;
+	text-decoration: none;
+	display: block;
+	color : #595A5A;
+	color : rgb(89, 90, 90);
+	padding-top: 1vh;
+	padding-left: 1%;
+	margin-right: 1%;
+    text-align: center;
+    position: center;
+}
+
+.container {
+	max-width: 50%;
+    margin: auto;
+	margin-top: 5vh;
+	background : #F7F7F7;
+	background : rgba(247, 247, 247, 1);
+	border-radius : 9px;
+	-moz-border-radius : 9px;
+	-webkit-border-radius : 9px;
+}
+
+th, td{
+	font-family : Montserrat;
+	font-size : 16px;
+	text-align: center;
+	color : #595A5A;
+	color : rgb(89, 90, 90);
+	text-align: left;
+	padding-left: 8px;
+    height: 5vh;
+}
+
+body {
+    font-family : Montserrat;
+	background : #90B4C4;
+	background : rgb(144, 180, 196, 0.5);
+    width: 100%;
+}
+
+.open-button{
+	background-color: rgb(3,98,128,0.9);
+	color : #F7F7F7;
+	color : rgb(247, 247, 247);
+	border: none;
+	cursor: pointer;
+    margin-top: 15px;
+    margin-right: 10px;
+	height: 35px;
+	opacity : 0.8;
+	font-family : Montserrat;
+    
+	border-radius : 9px;
+	-moz-border-radius : 9px;
+	-webkit-border-radius : 9px;
+}
+.open-button:hover {
+	opacity: 0.7;
+}
+
+.small-button{
+	background-color: rgb(3,98,128,0.9);
+	color : #F7F7F7;
+	color : rgb(247, 247, 247);
+	border: none;
+	cursor: pointer;
+    margin-top: 1.25vh;
+    margin-bottom: 1.25vh;
+	height: 2.5vh;
+	opacity : 0.8;
+	font-family : Montserrat;
+    width: 95%;
+    margin-right: 0;
+    float:right;
+	
+    grid-column: 3 / span 1;
+
+	border-radius : 9px;
+	-moz-border-radius : 9px;
+	-webkit-border-radius : 9px;
+}
+.popup-button{
+	background-color: rgb(3,98,128,0.9);
+	color : #F7F7F7;
+	color : rgb(247, 247, 247);
+	border: none;
+	cursor: pointer;
+    margin: 5px;
+	height: 25px;
+	opacity : 0.8;
+	font-family : Montserrat;
+    width: 80%;
+    left: 8.8%;
+    position: relative;
+
+	border-radius : 9px;
+	-moz-border-radius : 9px;
+	-webkit-border-radius : 9px;
+}
+.small-button:hover, .popup-button:hover {
+	opacity: 0.7;
+}
+
+.row{
+    position: center;
+}
+.tags{
+    position: center;
+}
+
+.form-popup {
+  display: none;
+  float: center;
+  position: absolute;
+  width: 30%;
+  top: 40%;
+  left: 35%;
+  z-index: 9;
+
+  background-color: rgb(224, 240, 244);
+  border-radius : 9px;
+  -moz-border-radius : 9px;
+  -webkit-border-radius : 9px;
+}
+
+input[type=text]{
+	font-family : Montserrat;
+	font-size: 15px;
+	width: 80%;
+    left: 10%;
+    margin: 5px;
+	border: 1px solid #ccc;
+	box-sizing: border-box;
+	height: 28px;
+	outline: none;
+	border-style : Solid;
+	border-color : #036280;
+	border-color : rgba(3, 98, 128, 1);
+	border-width : 1.1px;
+	border-radius : 9px;
+	-moz-border-radius : 9px;
+	-webkit-border-radius : 9px;
+}
+
+tr{
+    width: 33%;
+    height: 5vh;
+}
+.page-header{
+    display: grid;
+    grid-template-columns: [line0] 15% [line1] 35% [line2] 35% [line3] 15%[line4];
+}
+.buttons{
+    display: grid;
+    grid-template-columns: [line0] 25% [line1] 25% [line2] 24% [line3] 24% [line4];
+}
+
+
+</style>
+<body>
+  <div class="container">
+    <div class="page-header">
+        <h1>My Tags</h1>
+        <button class="open-button" onclick="openFormAdd()">Add Tag</button>
+        <div class = "form-popup" id="popup-add">
+            <div class="popup">
+            <form action="/add_tag" method="post" name="tag_edit" class="form_container">
+                <div class="field">
+                  <h2 for="title" class="label">Add New Tag</label>
+                  <div class="control">
+                    <input type="text" name="new_tag" class="input" placeholder="New tag" required="required"/>
+                  </div>
+                </div>
+                <button class="popup-button" type="submit">Add</button>
+                <button type="button" class="popup-button" onclick="closeFormAdd(name)">Close</button>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+      <div class="tags">
+        {% if tags %}
+          <table class="table" style="width:100%">            
+            <th style="width:50%; text-align: left; padding-left: 8px;" class="tag_list">Tag</th>
+            <th style="width:50%; text-align: right; padding-right: 15px;" class="tag_list">Actions</th>
+            {% for tag in tags %}
+              <tr>
+                <td class="tag_list">{{ tag }}</td>
+                <td class="buttons">
+                    <button class="small-button" onclick="openFormEdit('{{tag}}')">Edit</button>
+                    <form action="/delete_tag" method="post" class="delete_form">
+                        <input type="hidden" name="tag" value = "{{tag}}">
+                        <button class="small-button">Delete</button>
+                    </form>
+                    <div class = "form-popup" id="{{tag}}">
+                        <div class="popup">
+                        <form action="/edit_tag" method="post">
+                            <div class="field">
+                              <h2 for="title" class="label">Update Tag</label>
+                              <div class="control">
+                                <input type="text" name="new_tag" class="input" value = "{{tag}}" required="required"/>
+                                <input type="hidden" name="old_tag" value = "{{tag}}">
+                              </div>
+                            </div>
+                            <button type="submit" class="popup-button">Save</button>
+                            <button type="button" class="popup-button" onclick="closeFormEdit('{{tag}}')">Close</button>
+                        </form>
+                        </div>
+                    </div>
+                    
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% else %}
+          <p>No Tag found :(</p>
+        {% endif %}
+      </div>
+    </div>
+  </div> <!-- container -->
+  <script>
+    function openFormEdit(tag_name) {
+        closeAllPopUp()
+        document.getElementById(tag_name).style.display = "block";
+    }
+    
+    function closeFormEdit(tag_name) {
+      document.getElementById(tag_name).style.display = "none";
+    }
+
+    function openFormAdd() {
+        closeAllPopUp()
+        document.getElementById("popup-add").style.display = "block";
+    }
+    
+    function closeFormAdd() {
+      document.getElementById("popup-add").style.display = "none";
+    }
+    function closeAllPopUp(){
+        elements = document.getElementsByClassName("form-popup")
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].style.display = "none"
+        }
+    }
+</script>
+</body>
+{% endblock %}
